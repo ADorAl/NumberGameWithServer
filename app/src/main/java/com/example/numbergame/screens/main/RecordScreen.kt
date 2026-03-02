@@ -25,6 +25,7 @@ fun RecordScreen(navController: NavController) {
     val maxDifficulty = when (selectedTab) {
         "number" -> 4   // 숫자 게임 난이도 1~4
         "card" -> 4     // 카드 게임 난이도 1~4
+        "four_basic" -> 3 // 사칙 연산 게임 난이도 1~3
 
         else -> 2       // 다른 게임 기본값
     }
@@ -43,7 +44,7 @@ fun RecordScreen(navController: NavController) {
 
         // 🔹 탭 버튼
         Row(modifier = Modifier.fillMaxWidth()) {
-            listOf("number" to "숫자 맞히기", "card" to "카드 맞히기").forEach { (type, label) ->
+            listOf("number" to "숫자 맞히기", "card" to "카드 맞히기", "four_basic" to "사칙연산").forEach { (type, label) ->
                 Button(
                     onClick = { selectedTab = type },
                     colors = ButtonDefaults.buttonColors(

@@ -23,7 +23,7 @@ fun FourBasicOperationScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    var timeLeft by remember { mutableStateOf(30) } // 예시 30초
+    var timeLeft by remember { mutableStateOf(30) } // 제한 시간
     var answer by remember { mutableStateOf("") }
 
     // 문제 생성
@@ -62,12 +62,17 @@ fun FourBasicOperationScreen(
 
         Button(onClick = {
             val isCorrect = answer.toIntOrNull() == problem.answer
-            val usedTime = (30 - timeLeft) // 예시 계산
+            val usedTime = 30 - timeLeft
 
             scope.launch {
+                // ✅ DataStore 최고 기록 갱신
                 RecordManager.saveRecord(context, "four_basic", difficulty, usedTime)
+
+                // 성공/실패 화면 이동
                 if (isCorrect) {
-                    navController.navigate("four_basic_operation_success/$operation/$difficulty/$usedTime")
+                    navController.navigate(
+                        "four_basic_operation_success/$operation/$difficulty/$usedTime"
+                    )
                 } else {
                     navController.navigate("four_basic_operation_fail/$operation/$difficulty")
                 }
@@ -78,8 +83,10 @@ fun FourBasicOperationScreen(
     }
 }
 
+// 문제 데이터 클래스
 data class Problem(val question: String, val answer: Int)
 
+// 문제 생성 함수
 fun generateProblem(operation: String, difficulty: Int): Problem {
     val count = difficulty
     var question = ""
@@ -126,7 +133,6 @@ fun generateProblem(operation: String, difficulty: Int): Problem {
                 }
             }
             "÷" -> {
-                // 1단계이면 최종 answer를 먼저 결정
                 if (i == 0) {
                     answer = when (difficulty) {
                         1 -> (1..10).random()
@@ -143,7 +149,6 @@ fun generateProblem(operation: String, difficulty: Int): Problem {
                     val dividend = answer * divisor
                     question = "$dividend ÷ $divisor"
                 } else {
-                    // 두 번째 이후 단계: 이전 answer의 약수만 고르기
                     val divisors = (1..answer).filter { answer % it == 0 }
                     val divisor = divisors.random()
                     val dividend = answer * divisor
