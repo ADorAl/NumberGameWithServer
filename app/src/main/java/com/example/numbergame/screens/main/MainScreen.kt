@@ -131,6 +131,27 @@ fun MainScreen(navController: NavController) {
                         }
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 🔹 반응 속도 테스트 버튼
+            Button(
+                onClick = { navController.navigate("reaction_test") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(70.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9C27B0))
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text("반응 속도 테스트", fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text("⏱️", fontSize = 24.sp)
+                }
+            }
         }
     }
 }

@@ -19,6 +19,7 @@ import com.example.numbergame.screens.number.HintDifficultyScreen
 import com.example.numbergame.screens.number.HintGameScreen
 import com.example.numbergame.screens.number.HintSuccessScreen
 import com.example.numbergame.screens.number.NumberGameScreen
+import com.example.numbergame.screens.reaction.ReactionTestScreen
 import com.example.numbergame.screens.record.RecordScreen
 
 @Composable
@@ -201,6 +202,11 @@ fun NavGraph() {
             val operation = backStackEntry.arguments?.getString("operation") ?: "+"
             val difficulty = backStackEntry.arguments?.getInt("difficulty") ?: 1
             FourBasicOperationFailScreen(navController, operation, difficulty)
+        }
+
+        // 🔹 반응 속도 테스트
+        composable("reaction_test") {
+            ReactionTestScreen(navController)
         }
     }
 }
