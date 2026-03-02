@@ -14,7 +14,7 @@ import com.example.numbergame.screens.fourbasic.FourBasicOperationFailScreen
 import com.example.numbergame.screens.fourbasic.FourBasicOperationScreen
 import com.example.numbergame.screens.fourbasic.FourBasicOperationSuccessScreen
 import com.example.numbergame.screens.main.MainScreen
-import com.example.numbergame.screens.number.DifficultyScreen
+import com.example.numbergame.screens.main.DifficultyScreen
 import com.example.numbergame.screens.number.HintDifficultyScreen
 import com.example.numbergame.screens.number.HintGameScreen
 import com.example.numbergame.screens.number.HintSuccessScreen

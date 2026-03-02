@@ -1,12 +1,16 @@
 package com.example.numbergame.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -21,11 +25,9 @@ fun NumberSuccessScreen(
     elapsedTime: Double?
 ) {
 
-    val context = LocalContext.current   // ✅ 여기서 가져오기
-
+    val context = LocalContext.current
     val records = remember { mutableStateListOf<Double>() }
 
-    // 🔹 새로운 기록 저장 + 최신화
     LaunchedEffect(elapsedTime) {
         if (elapsedTime != null) {
             saveRecord(context, difficulty, elapsedTime)
@@ -36,67 +38,153 @@ fun NumberSuccessScreen(
 
     val bestScore = records.minOrNull()
 
-    Column(
+    val backgroundGradient = Brush.verticalGradient(
+        listOf(
+            Color(0xFF0F2027),
+            Color(0xFF203A43),
+            Color(0xFF2C5364)
+        )
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(backgroundGradient)
     ) {
 
-        Text(
-            "🎉 성공! (이번 기록: ${
-                elapsedTime?.let { String.format("%.3f", it) } ?: "-"
-            }초)",
-            fontSize = 24.sp
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        bestScore?.let {
-            Text(
-                "Best Score: ${String.format("%.3f", it)}초",
-                fontSize = 20.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Top 10 기록:")
-
-        records.forEachIndexed { index, time ->
-
-            val isNew = elapsedTime?.let {
-                abs(it - time) < 0.001
-            } ?: false
-
-            Text(
-                "${index + 1}등: ${
-                    String.format("%.3f", time)
-                }초 ${if (isNew) "NEW!" else ""}"
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = { navController.navigate("difficulty/number") },
-            modifier = Modifier.fillMaxWidth(0.6f)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("난이도 선택으로")
-        }
 
-        if (difficulty < 4) {
+            // 🎉 클리어 타이틀
+            Text(
+                text = "🏆 CLEAR!",
+                fontSize = 36.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFFFFD700)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // 💎 이번 기록 카드
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF00E5FF)
+                ),
+                elevation = CardDefaults.cardElevation(12.dp)
+            ) {
+                Text(
+                    text = "이번 기록\n${
+                        elapsedTime?.let { String.format("%.3f", it) } ?: "-"
+                    } 초",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // ⭐ BEST
+            bestScore?.let {
+                Text(
+                    text = "⭐ BEST : ${String.format("%.3f", it)} 초",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF00E676)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "🏅 TOP 10",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            records.take(10).forEachIndexed { index, time ->
+
+                val isNew = elapsedTime?.let {
+                    abs(it - time) < 0.001
+                } ?: false
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "${index + 1}등",
+                        color = Color.White
+                    )
+
+                    if (isNew) {
+                        Text(
+                            text = "🔥 NEW!",
+                            color = Color.Yellow,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Text(
+                        text = "${String.format("%.3f", time)}초",
+                        color = if (isNew) Color.Yellow else Color.White,
+                        fontWeight = if (isNew) FontWeight.Bold else FontWeight.Normal
+                    )
+
+
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // 🎮 버튼들
+            GameMenuButton("난이도 선택") {
+                navController.navigate("difficulty/number")
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
+            if (difficulty < 4) {
+                GameMenuButton("다음 난이도 ▶") {
                     navController.navigate("game/number/${difficulty + 1}")
-                },
-                modifier = Modifier.fillMaxWidth(0.6f)
-            ) {
-                Text("다음 난이도")
+                }
             }
         }
+    }
+}
+
+@Composable
+fun GameMenuButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth(0.7f)
+            .height(55.dp),
+        shape = RoundedCornerShape(30.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF6200EE)
+        )
+    ) {
+        Text(
+            text = text,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White
+        )
     }
 }

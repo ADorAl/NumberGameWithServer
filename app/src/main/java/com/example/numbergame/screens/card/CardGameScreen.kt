@@ -1,5 +1,6 @@
 package com.example.numbergame.screens.card
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,9 +8,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -32,6 +34,7 @@ fun CardGameScreen(navController: NavController, difficulty: Int) {
 
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
     val rowCount = difficulty + 1
     val columnCount = 4
     val totalCardCount = rowCount * columnCount
@@ -46,7 +49,11 @@ fun CardGameScreen(navController: NavController, difficulty: Int) {
 
     var timeLeft by remember { mutableStateOf(timeLimit) }
     var cards by remember { mutableStateOf(generateCards(pairCount)) }
-    var selectedCards by remember { mutableStateOf(listOf<Card>()) }
+
+    // ✅ 타입 명확히 지정 (에러 해결)
+    var selectedCards by remember {
+        mutableStateOf<List<Card>>(emptyList())
+    }
 
     // ⏳ 타이머
     LaunchedEffect(timeLeft) {
@@ -58,87 +65,138 @@ fun CardGameScreen(navController: NavController, difficulty: Int) {
         }
     }
 
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxSize()
+    val background = Brush.verticalGradient(
+        listOf(
+            Color(0xFF0F2027),
+            Color(0xFF203A43),
+            Color(0xFF2C5364)
+        )
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(background)
     ) {
 
-        val cardSize = min(
-            maxWidth / columnCount - 12.dp,
-            (maxHeight - 120.dp) / rowCount - 12.dp
-        )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+            val cardSize = min(
+                maxWidth / columnCount - 12.dp,
+                (maxHeight - 120.dp) / rowCount - 12.dp
+            )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("남은 시간: $timeLeft 초", fontSize = 20.sp)
-            Spacer(modifier = Modifier.height(16.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-            cards.chunked(columnCount).forEach { row ->
-                Row {
-                    row.forEach { card ->
-                        FlipCard(
-                            card = card,
-                            size = cardSize,
-                            onClick = {
-                                if (!card.isFlipped && !card.isMatched && selectedCards.size < 2) {
-                                    cards = cards.map { if (it.id == card.id) it.copy(isFlipped = true) else it }
-                                    val newSelected = selectedCards + card.copy(isFlipped = true)
-                                    selectedCards = newSelected
+                Spacer(modifier = Modifier.height(16.dp))
 
-                                    if (newSelected.size == 2) {
-                                        scope.launch {
-                                            delay(700)
+                // 🎯 HUD 타이머
+                val timerColor by animateColorAsState(
+                    targetValue = if (timeLeft <= 5)
+                        Color(0xFFFF1744)
+                    else
+                        Color(0xFF00E5FF),
+                    label = ""
+                )
 
-                                            if (newSelected[0].value == newSelected[1].value) {
-                                                cards = cards.map {
-                                                    if (it.id == newSelected[0].id || it.id == newSelected[1].id)
-                                                        it.copy(isMatched = true)
-                                                    else it
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = timerColor),
+                    elevation = CardDefaults.cardElevation(12.dp)
+                ) {
+                    Text(
+                        text = "⏳ TIME : $timeLeft",
+                        fontSize = 22.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                cards.chunked(columnCount).forEach { row ->
+                    Row {
+                        row.forEach { card ->
+                            NeonFlipCard(
+                                card = card,
+                                size = cardSize,
+                                onClick = {
+                                    if (!card.isFlipped &&
+                                        !card.isMatched &&
+                                        selectedCards.size < 2
+                                    ) {
+
+                                        cards = cards.map {
+                                            if (it.id == card.id)
+                                                it.copy(isFlipped = true)
+                                            else it
+                                        }
+
+                                        val newSelected =
+                                            selectedCards + card.copy(isFlipped = true)
+                                        selectedCards = newSelected
+
+                                        if (newSelected.size == 2) {
+                                            scope.launch {
+                                                delay(700)
+
+                                                if (newSelected[0].value ==
+                                                    newSelected[1].value
+                                                ) {
+                                                    cards = cards.map {
+                                                        if (it.id == newSelected[0].id ||
+                                                            it.id == newSelected[1].id
+                                                        )
+                                                            it.copy(isMatched = true)
+                                                        else it
+                                                    }
+                                                } else {
+                                                    cards = cards.map {
+                                                        if (it.id == newSelected[0].id ||
+                                                            it.id == newSelected[1].id
+                                                        )
+                                                            it.copy(isFlipped = false)
+                                                        else it
+                                                    }
                                                 }
-                                            } else {
-                                                cards = cards.map {
-                                                    if (it.id == newSelected[0].id || it.id == newSelected[1].id)
-                                                        it.copy(isFlipped = false)
-                                                    else it
-                                                }
-                                            }
 
-                                            selectedCards = emptyList()
+                                                selectedCards = emptyList()
 
-                                            if (cards.all { it.isMatched }) {
-                                                val usedTime = timeLimit - timeLeft
+                                                if (cards.all { it.isMatched }) {
+                                                    val usedTime = timeLimit - timeLeft
 
-                                                scope.launch {
                                                     RecordManager.saveRecord(
                                                         context,
                                                         "card",
                                                         difficulty,
                                                         usedTime
                                                     )
-                                                    navController.navigate("card_success/$difficulty/$usedTime")
+
+                                                    navController.navigate(
+                                                        "card_success/$difficulty/$usedTime"
+                                                    )
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 }
 
 @Composable
-fun FlipCard(card: Card, size: Dp, onClick: () -> Unit) {
+fun NeonFlipCard(card: Card, size: Dp, onClick: () -> Unit) {
 
     val rotation by animateFloatAsState(
         targetValue = if (card.isFlipped || card.isMatched) 180f else 0f,
@@ -158,11 +216,14 @@ fun FlipCard(card: Card, size: Dp, onClick: () -> Unit) {
     ) {
 
         if (rotation <= 90f) {
-            // 🔵 카드 뒷면
+            // 🔵 카드 뒷면 (네온 느낌)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF6200EE), RoundedCornerShape(8.dp))
+                    .background(
+                        Color(0xFF6200EE),
+                        RoundedCornerShape(12.dp)
+                    )
             )
         } else {
             // 🟢 카드 앞면
@@ -171,18 +232,30 @@ fun FlipCard(card: Card, size: Dp, onClick: () -> Unit) {
                     .fillMaxSize()
                     .graphicsLayer { rotationY = 180f }
                     .background(
-                        if (card.isMatched) Color.LightGray else Color.White,
-                        RoundedCornerShape(8.dp)
+                        if (card.isMatched)
+                            Color(0xFFB2FF59)
+                        else
+                            Color.White,
+                        RoundedCornerShape(12.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = card.value.toString(), color = Color.Black, fontSize = 22.sp)
+                Text(
+                    text = card.value.toString(),
+                    fontSize = 22.sp,
+                    color = Color.Black
+                )
             }
         }
     }
 }
 
 fun generateCards(pairCount: Int): List<Card> {
-    val numbers = (1..pairCount).flatMap { listOf(it, it) }.shuffled()
-    return numbers.mapIndexed { index, value -> Card(id = index, value = value) }
+    val numbers = (1..pairCount)
+        .flatMap { listOf(it, it) }
+        .shuffled()
+
+    return numbers.mapIndexed { index, value ->
+        Card(id = index, value = value)
+    }
 }

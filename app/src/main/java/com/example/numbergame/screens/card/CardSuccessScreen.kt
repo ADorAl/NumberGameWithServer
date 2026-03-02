@@ -1,17 +1,23 @@
 package com.example.numbergame.screens.card
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.*
 import androidx.navigation.NavController
 import com.example.numbergame.data.getRecords
 import com.example.numbergame.data.saveRecord
+import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 @Composable
@@ -26,77 +32,135 @@ fun CardSuccessScreen(
 
     val usedTimeDouble = usedTime.toDouble()
 
-    // 🔥 카드 전용으로 저장 (key 수정 필요)
     LaunchedEffect(usedTime) {
         saveRecord(context, difficulty + 100, usedTimeDouble)
         records.clear()
-        records.addAll(
-            getRecords(context, difficulty + 100)
-        )
+        records.addAll(getRecords(context, difficulty + 100))
     }
 
     val bestScore = records.minOrNull()
 
-    Column(
+    val background = Brush.verticalGradient(
+        listOf(
+            Color(0xFF0F2027),
+            Color(0xFF203A43),
+            Color(0xFF2C5364)
+        )
+    )
+
+    var glow by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(700)
+            glow = !glow
+        }
+    }
+
+    val titleColor by animateColorAsState(
+        targetValue = if (glow) Color(0xFF00E676) else Color(0xFF69F0AE),
+        label = ""
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .background(background)
     ) {
 
-        Text(
-            "🎉 성공! (이번 기록: ${usedTime}초)",
-            fontSize = 24.sp
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        bestScore?.let {
-            Text(
-                "Best Score: ${String.format("%.0f", it)}초",
-                fontSize = 20.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Top 10 기록:")
-
-        records.forEachIndexed { index, time ->
-
-            val isNew =
-                abs(time - usedTimeDouble) < 0.001
-
-            Text(
-                "${index + 1}등: ${
-                    String.format("%.0f", time)
-                }초 ${if (isNew) "NEW!" else ""}"
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                navController.navigate("difficulty/card")
-            },
-            modifier = Modifier.fillMaxWidth(0.6f)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("난이도 선택으로")
-        }
 
-        if (difficulty < 4) {
+            Text(
+                text = "🎉 STAGE CLEAR!",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = titleColor
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "이번 게임의 기록 : ${usedTime} 초",
+                fontSize = 22.sp,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            bestScore?.let {
+                Text(
+                    text = "🏆 BEST : ${String.format("%.0f", it)} sec",
+                    fontSize = 20.sp,
+                    color = Color.Yellow
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "TOP 10 RANKING",
+                fontSize = 18.sp,
+                color = Color.LightGray
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            records.forEachIndexed { index, time ->
+
+                val isNew = abs(time - usedTimeDouble) < 0.001
+
+                Text(
+                    text = "${index + 1}. ${
+                        String.format("%.0f", time)
+                    } sec ${if (isNew) "✨ NEW!" else ""}",
+                    fontSize = 18.sp,
+                    color = if (isNew) Color(0xFF00E5FF) else Color.White
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
             Button(
                 onClick = {
-                    navController.navigate(
-                        "game/card/${difficulty + 1}"
-                    )
+                    navController.navigate("difficulty/card")
                 },
-                modifier = Modifier.fillMaxWidth(0.6f)
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00E5FF)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(56.dp)
             ) {
-                Text("다음 난이도")
+                Text("🎯 SELECT LEVEL", fontSize = 18.sp)
+            }
+
+            if (difficulty < 4) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = {
+                        navController.navigate("game/card/${difficulty + 1}")
+                    },
+                    shape = RoundedCornerShape(20.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6200EE)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth(0.7f)
+                        .height(56.dp)
+                ) {
+                    Text("🚀 NEXT STAGE", fontSize = 18.sp)
+                }
             }
         }
     }
