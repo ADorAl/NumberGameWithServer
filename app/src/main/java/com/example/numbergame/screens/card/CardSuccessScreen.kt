@@ -129,6 +129,26 @@ fun CardSuccessScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // 🔥 다시 도전 버튼
+            Button(
+                onClick = {
+                    navController.navigate("card_game/$difficulty") {
+                        popUpTo("card_game/$difficulty") { inclusive = true }
+                    }
+                },
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00E5FF)
+                ),
+                elevation = ButtonDefaults.buttonElevation(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(56.dp)
+            ) {
+                Text("🔁 재시작", fontSize = 18.sp)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = {
                     navController.navigate("difficulty/card")
@@ -141,7 +161,7 @@ fun CardSuccessScreen(
                     .fillMaxWidth(0.7f)
                     .height(56.dp)
             ) {
-                Text("🎯 SELECT LEVEL", fontSize = 18.sp)
+                Text("🎯 레벨 선택", fontSize = 18.sp)
             }
 
             if (difficulty < 4) {
@@ -159,7 +179,7 @@ fun CardSuccessScreen(
                         .fillMaxWidth(0.7f)
                         .height(56.dp)
                 ) {
-                    Text("🚀 NEXT STAGE", fontSize = 18.sp)
+                    Text("🚀 다음 단계로", fontSize = 18.sp)
                 }
             }
         }

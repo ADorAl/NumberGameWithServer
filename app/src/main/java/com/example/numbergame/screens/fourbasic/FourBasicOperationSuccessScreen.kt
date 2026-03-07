@@ -117,6 +117,29 @@ fun FourBasicOperationSuccessScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
+            // 🔥 다시 도전 버튼
+            Button(
+                onClick = {
+                    navController.navigate("four_basic_operation/$operation/$difficulty") {
+                        popUpTo("four_basic_operation/$operation/$difficulty") {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00E5FF)
+                ),
+                elevation = ButtonDefaults.buttonElevation(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(56.dp)
+            ) {
+                Text("🔁 재시작", fontSize = 18.sp)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
             Button(
                 onClick = { navController.navigate("main") },
                 modifier = Modifier
