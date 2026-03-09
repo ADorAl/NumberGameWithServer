@@ -132,8 +132,8 @@ fun CardSuccessScreen(
             // 🔥 다시 도전 버튼
             Button(
                 onClick = {
-                    navController.navigate("card_game/$difficulty") {
-                        popUpTo("card_game/$difficulty") { inclusive = true }
+                    navController.navigate("game/card/$difficulty") {
+                        popUpTo("game/card/$difficulty") { inclusive = true }
                     }
                 },
                 shape = RoundedCornerShape(20.dp),
