@@ -1,9 +1,12 @@
 package com.example.numbergame.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
+import com.example.numbergame.data.TokenManager
 import com.example.numbergame.screens.auth.LoginScreen
 import com.example.numbergame.screens.auth.SignupScreen
 import com.example.numbergame.screens.main.MainScreen
@@ -24,8 +27,14 @@ import com.example.numbergame.screens.record.RecordScreen
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
+    val context = LocalContext.current
 
-    NavHost(navController = navController, startDestination = "login") {
+    // 🔹 로그인 여부에 따라 시작 화면 결정
+    val startDestination = remember {
+        if (TokenManager.getToken(context) != null) "main" else "login"
+    }
+
+    NavHost(navController = navController, startDestination = startDestination) {
 
         // 🔹 인증
         composable("login") { LoginScreen(navController) }
