@@ -10,6 +10,9 @@
 .DS_Store
 /build
 /captures
+/spring-server/out/
+/spring-server/build/
+/spring-server/.idea/
 .externalNativeBuild
 .cxx
 local.properties

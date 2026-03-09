@@ -8,7 +8,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitClient {
 
-    private static final String BASE_URL = "http://58.228.42.105:8080/";
+    // 🔹 ngrok 외부 URL
+    private static final String BASE_URL = "https://rancid-chet-overreadily.ngrok-free.dev/";
+
     private static Retrofit retrofit = null;
 
     public static UserApi getUserApi(Context context) {

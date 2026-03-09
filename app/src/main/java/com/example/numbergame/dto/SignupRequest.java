@@ -1,6 +1,7 @@
 package com.example.numbergame.dto;
 
 public class SignupRequest {
+
     private String id;
     private String password;
 

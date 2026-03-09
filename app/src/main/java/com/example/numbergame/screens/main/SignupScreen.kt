@@ -1,48 +1,39 @@
 package com.example.numbergame.screens.auth
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-
-import com.example.numbergame.network.RetrofitClient
 import com.example.numbergame.dto.SignupRequest
 import com.example.numbergame.dto.UserResponse
-
+import com.example.numbergame.network.RetrofitClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 @Composable
 fun SignupScreen(navController: NavController) {
-
     val context = LocalContext.current
-    val userApi = RetrofitClient.getUserApi(context)
 
     var id by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var successMessage by remember { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
-
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-
-        Text(
-            text = "회원가입",
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
+        Text("Signup", fontSize = 30.sp)
+        Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
             value = id,
@@ -50,8 +41,7 @@ fun SignupScreen(navController: NavController) {
             label = { Text("ID") },
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         OutlinedTextField(
             value = password,
@@ -59,54 +49,47 @@ fun SignupScreen(navController: NavController) {
             label = { Text("Password") },
             modifier = Modifier.fillMaxWidth()
         )
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-
-                val request = SignupRequest(id, password)
-
-                userApi.signup(request).enqueue(object : Callback<UserResponse> {
-
+                val signupRequest = SignupRequest(id, password)
+                val call = RetrofitClient.getUserApi(context).signup(signupRequest)
+                call.enqueue(object : Callback<UserResponse> {
                     override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
-
                         if (response.isSuccessful) {
-
-                            Toast.makeText(context, "회원가입 성공", Toast.LENGTH_SHORT).show()
-                            navController.navigate("login")
-
+                            successMessage = "Signup successful! Please login."
+                            navController.navigate("login") {
+                                popUpTo("signup") { inclusive = true }
+                            }
                         } else {
-
-                            Toast.makeText(context, "회원가입 실패", Toast.LENGTH_SHORT).show()
-
+                            errorMessage = "Signup failed: ${response.code()}"
                         }
-
                     }
 
                     override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-
-                        Toast.makeText(context, "서버 연결 실패", Toast.LENGTH_SHORT).show()
-
+                        errorMessage = "Signup failed: ${t.message}"
                     }
-
                 })
-
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text("회원가입")
+            Text("Signup")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        TextButton(onClick = {
-            navController.navigate("login")
-        }) {
-            Text("로그인으로 돌아가기")
+        Spacer(modifier = Modifier.height(8.dp))
+        TextButton(onClick = { navController.navigate("login") }) {
+            Text("Go to Login")
         }
 
+        successMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(it, color = MaterialTheme.colorScheme.primary)
+        }
+
+        errorMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
     }
 }
