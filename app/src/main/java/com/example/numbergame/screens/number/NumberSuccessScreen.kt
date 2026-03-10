@@ -149,6 +149,30 @@ fun NumberSuccessScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
+            // 🔥 다시 도전 버튼
+            Button(
+                onClick = {
+                    navController.navigate("game/number/$difficulty") {
+                        popUpTo("game/number/$difficulty") {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                },
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00E5FF)
+                ),
+                elevation = ButtonDefaults.buttonElevation(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.7f)
+                    .height(56.dp)
+            ) {
+                Text("🔁 재시작", fontSize = 18.sp)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+
             // 🎮 버튼들
             GameMenuButton("난이도 선택") {
                 navController.navigate("difficulty/number")
